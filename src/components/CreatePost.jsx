@@ -1,33 +1,45 @@
 import { useContext, useRef } from "react";
-import {PostList} from "../store/post-list-store";
- 
+import { PostList } from "../store/post-list-store";
+
 const CreatePost = () => {
+  const { addPost } = useContext(PostList);
+  const userIdElement = useRef();
+  const postTitleElement = useRef();
+  const postBodyElement = useRef();
+  const reactionsElement = useRef();
+  const tagsElement = useRef();
 
-const{addPost}=useContext(PostList);
-  const userIdElement=useRef();
-const postTitleElement=useRef();
-const postBodyElement=useRef();
-const reactionsElement=useRef();
-const tagsElement=useRef();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const userId = userIdElement.current.value;
+    const postTitle = postTitleElement.current.value;
+    const postBody = postBodyElement.current.value;
+    const reactions = reactionsElement.current.value;
+    const tags = tagsElement.current.value.split(" ");
 
-const handleSubmit = (event) => {
-  event.preventDefault();
-  const userId = userIdElement.current.value;
-  const postTitle = postTitleElement.current.value;
-  const postBody = postBodyElement.current.value;
-  const reactions = reactionsElement.current.value;
-  const tags = tagsElement.current.value.split(" ");
+    userIdElement.current.value = "";
+    postTitleElement.current.value = "";
+    postBodyElement.current.value = "";
+    reactionsElement.current.value = "";
+    tagsElement.current.value = "";
 
-  userIdElement.current.value="";
-  postTitleElement.current.value="";
-  postBodyElement.current.value="";
-  reactionsElement.current.value="";
-  tagsElement.current.value="";
-  
-  addPost(userId, postTitle, postBody, reactions, tags);
+    fetch("https://dummyjson.com/posts/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        
+        title: postTitle,
+        body: postBody,
+        reaction: reactions,
+        userId: userId,
+        tags: tags,
+      }),
+    })
+      .then((res) => res.json())
+      .then(post=>addPost(post));
 
-
-}
+    addPost(post);
+  };
   return (
     <form className="create-post" onSubmit={handleSubmit}>
       <div className="mb-3">
@@ -71,7 +83,7 @@ const handleSubmit = (event) => {
 
       <div className="mb-3">
         <label for="reactions" className="form-label">
-         Nubmer of Reactions
+          Nubmer of Reactions
         </label>
         <input
           type="text"
@@ -84,18 +96,16 @@ const handleSubmit = (event) => {
 
       <div className="mb-3">
         <label for="tags" className="form-label">
-        Enter your hashtags here
+          Enter your hashtags here
         </label>
         <input
           type="text"
           className="form-control"
-          id="tags" 
+          id="tags"
           ref={tagsElement}
           placeholder="please enter your tags here"
         />
       </div>
-
-      
 
       <button type="submit" className="btn btn-primary">
         Submit
